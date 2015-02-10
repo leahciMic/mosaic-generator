@@ -63,6 +63,6 @@ http.createServer(function (req, res) {
   res.writeHead(404, {'Content-Type': 'text/plain'});
   res.write('404 Not Found\n');
   res.end();
-}).listen(PORT, 'localhost');
+}).listen(PORT);
 
 console.log('mosaic server running on port ' + PORT);
