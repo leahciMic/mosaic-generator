@@ -41,11 +41,13 @@ http.createServer(function (req, res) {
       return;
     } else {
       var gw = gm(mosaic.TILE_WIDTH, mosaic.TILE_HEIGHT, '#ffffff00')
+        .options({imageMagick: true})
         .fill('#' + hex)
         .stroke('white', 0)
         .drawEllipse(mosaic.TILE_WIDTH / 2 - 0.5, mosaic.TILE_HEIGHT / 2 - 0.5, mosaic.TILE_WIDTH / 2 + 0.5, mosaic.TILE_HEIGHT / 2 + 0.5)
         .stream('png');
       var chunks = [];
+
       gw.on('data', function(chunk) { chunks.push(chunk); });
       gw.on('end', function() {
         var buf = Buffer.concat(chunks);
