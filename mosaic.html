@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/async/0.9.0/async.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/bluebird/latest/bluebird.min.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/lodash/3.0.0/lodash.min.js"></script>
+  <script type="text/javascript" src="js/constants.js"></script>
+  <script type="text/javascript" src="js/mosaic.js"></script>
+  <script type="text/javascript" src="js/client.js"></script>
+
+  <style type="text/css">
+    document {
+      height: 100%;
+    }
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      background: #3F51B5;
+      color: #eee;
+      font-weight: 200;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      font-size: 18px;
+    }
+    header h1 {
+      color: white;
+      font-size: 54px;
+    }
+    header h1, header p {
+      margin-top: 2em;
+      font-weight: 200;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    header p {
+      font-size: 24px;
+      margin-top: 0;
+      color: #ddd;
+    }
+    #render {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      display: none;
+    }
+    body.min #render {
+      display: block;
+    }
+    body.min header {
+      background: #3F51B5;
+      height: 40px;
+    }
+    body.min h1 {
+      font-size: 24px;
+      margin: 0;
+      padding-top: 5px;
+      padding-left: 5px;
+      text-align: left;
+    }
+    body.min {
+      background: #E8EAF6;
+    }
+    body.min .hidemin {
+      display: none;
+    }
+    body.min .myButton {
+      font-size: 15px;
+      padding: 5px 12px;
+    }
+    body.min .buttons {
+      margin: 0;
+      margin-right: 5px;
+      position: absolute;
+      right: 0px;
+      top: 5px;
+    }
+    body.min #saveButton {
+      display: inline-block;
+    }
+    #saveButton {
+      display: none;
+    }
+    .myButton {
+      background-color:#ff4080;
+      -moz-border-radius:6px;
+      -webkit-border-radius:6px;
+      border-radius:6px;
+      border:1px solid #e91e62;
+      display:inline-block;
+      cursor:pointer;
+      color:#ffffff;
+
+      font-size: 32px;
+      font-weight: 200;
+      padding:6px 24px;
+      text-decoration:none;
+      text-shadow:0px -1px 0px #f06291;
+    }
+    .myButton:hover {
+      background-color:#e91e62;
+    }
+    .myButton:active {
+      position:relative;
+      top:1px;
+    }
+    p {
+      text-align: center;
+    }
+    main p:first-child {
+      margin-top: 5em;
+    }
+    .myButton i {
+      font-family: arial;
+      font-size: 60px;
+      line-height: 12px;
+      font-style: normal;
+    }
+    body.min .myButton i {
+      font-size: 26px;
+      line-height: 12px;
+    }
+    * {
+      box-sizing: border-box;
+    }
+  </style>
+  <title>Mosaic</title>
+</head>
+<body>
+  <header>
+    <h1>Mosaic Generator</h1>
+    <p class="hidemin">Created with ♥ by Michael Leaney</p>
+  </header>
+  <main>
+    <p class="buttons">
+      <a download="mosaic.jpg" class="myButton" id="saveButton"><i>&#65516;</i> Save</a> <button class="myButton" id="fileButton"><i>&#65514;</i> Select file</button>
+    </p>
+    <p class="hidemin">or drop a file anywhere on this page</p>
+  </main>
+  <input style="display: none" type="file" id="fileInput">
+  <canvas id="render"></canvas>
+</body>
+</html>
