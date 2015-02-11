@@ -12,6 +12,7 @@ var setupRenderCanvas = function setupRenderCanvas() {
   setCanvasFullScreen();
 };
 
+var rerender;
 document.addEventListener('DOMContentLoaded', function() {
   setupRenderCanvas();
 
@@ -33,13 +34,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('saveButton').download = filename;
 
     // create a mosaic!
-    mosaic.create(this.files[0], document.getElementById('render'));
+    var file = this.files[0];
+    rerender = function() {
+      mosaic.create(file, document.getElementById('render'), document.getElementById('colors').value);
+    };
+    rerender();
   };
 
   var stopEvents = function(e) {
     e.preventDefault();
     e.stopPropagation();
   };
+
+  document.getElementById('colors').addEventListener('change', function() {
+    if (rerender) {
+      rerender();
+    }
+  });
 
   // support drag and drop! (sorry no ui feedback)
   var dropEvent = function(e) {

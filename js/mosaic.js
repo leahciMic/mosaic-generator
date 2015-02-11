@@ -6,7 +6,11 @@ Mosaic.prototype.componentToHex = function(c) {
     return hex.length == 1 ? "0" + hex : hex;
 };
 
-Mosaic.prototype.rgbToHex = function(r, g, b) {
+Mosaic.prototype.rgbToHex = function(r, g, b, colors) {
+    r = Math.floor((Math.floor(r / 255 * colors) / colors) * 255);
+    g = Math.floor((Math.floor(g / 255 * colors) / colors) * 255);
+    b = Math.floor((Math.floor(b / 255 * colors) / colors) * 255);
+
     return this.componentToHex(r)
       + this.componentToHex(g)
       + this.componentToHex(b);
@@ -26,7 +30,7 @@ Mosaic.prototype.getImageFromFile = function(file) {
 // returns a array of objects containing pixel data
 // returned object has 3 keys: color, x, y
 // x and y are mosaic coordinates
-Mosaic.prototype.getPixelMap = function(size, image) {
+Mosaic.prototype.getPixelMap = function(size, image, colors) {
   var tmpCanvas = document.createElement('canvas'),
       context = tmpCanvas.getContext('2d');
 
@@ -35,7 +39,7 @@ Mosaic.prototype.getPixelMap = function(size, image) {
 
   context.drawImage(image, 0, 0, size.x, size.y);
 
-  var tileColors = this.getTileColorMap(context.getImageData(0, 0, size.x, size.y));
+  var tileColors = this.getTileColorMap(context.getImageData(0, 0, size.x, size.y), colors);
 
   return tileColors.map(function(color, i) {
     return {
@@ -47,14 +51,14 @@ Mosaic.prototype.getPixelMap = function(size, image) {
 };
 
 // used to convert the data we get back from getImageData to something more manageable
-Mosaic.prototype.getTileColorMap = function(img) {
+Mosaic.prototype.getTileColorMap = function(img, colors) {
   var i,
       l = img.data.length,
       data = [];
 
   for (i = 0; i < l; i += 4) {
     data.push(
-      this.rgbToHex(img.data[i], img.data[i + 1], img.data[i + 2])
+      this.rgbToHex(img.data[i], img.data[i + 1], img.data[i + 2], colors)
     );
   }
 
@@ -62,19 +66,20 @@ Mosaic.prototype.getTileColorMap = function(img) {
 };
 
 // create a mosaic from file onto targetCanvas
-Mosaic.prototype.create = function(file, targetCanvas) {
+Mosaic.prototype.create = function(file, targetCanvas, colors) {
   var self = this,
       context = targetCanvas.getContext('2d');
 
+  colors = colors || 16;
   context.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
 
   this.getImageFromFile(file).then(function(image) {
     var targetSize = self.getTargetSize(image, targetCanvas),
         mosaicDimensions = self.getMosaicDimensions(targetSize),
-        pixelMap = self.getPixelMap(mosaicDimensions, image),
+        pixelMap = self.getPixelMap(mosaicDimensions, image, colors),
         uniqueColors = _.unique(_.pluck(pixelMap, 'color'));
 
-    var completeImages = {};
+    var completeTiles = {};
     var currentRowIdx = 1, currentRow = _.where(pixelMap, {y: currentRowIdx});
 
     var offset = {
@@ -82,30 +87,41 @@ Mosaic.prototype.create = function(file, targetCanvas) {
       y: (targetCanvas.height - targetSize.y) / 2
     };
 
-    var drawAvailableRows = function() {
+    var currentRowIsComplete = function() {
       for (var i = 0, l = currentRow.length; i < l; i++) {
-        if (!completeImages[currentRow[i].color]) {
-          return;
+        if (!completeTiles[currentRow[i].color]) {
+          return false;
         }
       }
+      return true;
+    };
+
+    var drawAvailableRows = function() {
+      if (!currentRowIsComplete()) {
+        return;
+      }
       currentRow.forEach(function(pixel) {
-        context.drawImage(completeImages[pixel.color], offset.x + (pixel.x-1) * TILE_WIDTH, offset.y + (pixel.y-1) * TILE_HEIGHT);
+        context.drawImage(completeTiles[pixel.color], offset.x + (pixel.x-1) * TILE_WIDTH, offset.y + (pixel.y-1) * TILE_HEIGHT);
       });
       currentRowIdx++;
       currentRow = _.where(pixelMap, {y: currentRowIdx});
+      if (currentRow.length == 0) {
+        return;
+      }
+      drawAvailableRows();
     };
-
 
     // use async to download upto max 16 images at a time
     async.mapLimit(uniqueColors, 16, function(color, callback) {
       var image = new Image;
       image.src = 'color/' + color;
       image.onload = function() {
-        drawAvailableRows();
-        completeImages[color] = image;
+        completeTiles[color] = image;
         callback(false, image);
+        drawAvailableRows();
       }
     }, function() {
+      drawAvailableRows();
 
     });
   });
