@@ -41,7 +41,7 @@ http.createServer(function (req, res) {
       return;
     } else {
       var gw = gm(mosaic.TILE_WIDTH, mosaic.TILE_HEIGHT, '#ffffff00')
-        .options({imageMagick: true})
+        .options({imageMagick: PORT != 8765})
         .fill('#' + hex)
         .stroke('white', 0)
         .drawEllipse(mosaic.TILE_WIDTH / 2 - 0.5, mosaic.TILE_HEIGHT / 2 - 0.5, mosaic.TILE_WIDTH / 2 + 0.5, mosaic.TILE_HEIGHT / 2 + 0.5)
